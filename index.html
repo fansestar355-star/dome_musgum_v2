@@ -1393,7 +1393,9 @@
       }
 
       #constructionBtn.active {
-        display: none !important;
+        background: rgba(248, 213, 155, 0.25);
+        border-color: #f8d59b;
+        box-shadow: 0 0 20px rgba(248, 213, 155, 0.5);
       }
 
       /* --- Bouton Retour Architecture --- */
@@ -2215,10 +2217,7 @@
     </button>
 
     <!-- Polyfill pour les anciens navigateurs mobiles (Import Maps) -->
-    <script
-      async
-      src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"
-    ></script>
+    <script src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
 
     <!-- Importmap pour Three.js -->
     <script type="importmap">
@@ -2474,7 +2473,7 @@
           const outputPass = new OutputPass();
 
           // Bloom Pass (Effet de flou lumineux / rêveur)
-          const bloomPass = new UnrealBloomPass(
+          bloomPass = new UnrealBloomPass(
             new THREE.Vector2(window.innerWidth, window.innerHeight),
             0.05, // Intensité (0.1 à 0.5 recommandé)
             0.4, // Rayon
@@ -2843,12 +2842,10 @@
         flashLight = new THREE.DirectionalLight(0xffffff, 0);
         scene.add(flashLight);
 
-        document
-          .getElementById("rainBtn")
-          .addEventListener("click", toggleRain);
-        document
-          .getElementById("fixedStopBtn")
-          .addEventListener("click", () => toggleRain(false));
+        const rainBtn = document.getElementById("rainBtn");
+        const fixedStopBtn = document.getElementById("fixedStopBtn");
+        if (rainBtn) rainBtn.addEventListener("click", toggleRain);
+        if (fixedStopBtn) fixedStopBtn.addEventListener("click", () => toggleRain(false));
       }
 
       function toggleRain(forceState = null) {
@@ -3381,7 +3378,16 @@
 
       // --- Logique Construction Interactive ---
       window.toggleConstruction = function () {
-        if (!musgumModel) return;
+        if (!musgumModel) {
+          const btn = document.getElementById("constructionBtn");
+          if (btn) {
+            const orig = btn.innerHTML;
+            btn.innerHTML = "⏳ Chargement…";
+            btn.style.opacity = "0.6";
+            setTimeout(() => { btn.innerHTML = orig; btn.style.opacity = ""; }, 2000);
+          }
+          return;
+        }
         isConstructionMode = !isConstructionMode;
 
         // ACTIVER LE CONTRÔLE DE LA CAMÉRA QUAND CONSTRUCTION EST ACTIF
@@ -3423,6 +3429,7 @@
 
         if (isConstructionMode) {
           btn.classList.add("active");
+          btn.innerHTML = "✅ Architecture";
           if (exitBtn) exitBtn.style.display = "block";
           if (hud) hud.classList.add("active");
           controls.target.set(-180, 8, -180); // S'assurer que le focus est sur le dôme principal
@@ -3480,6 +3487,7 @@
           else updateConstructionHeight(0);
         } else {
           btn.classList.remove("active");
+          btn.innerHTML = "🏗️ Architecture";
           if (exitBtn) exitBtn.style.display = "none";
           if (hud) hud.classList.remove("active");
 
