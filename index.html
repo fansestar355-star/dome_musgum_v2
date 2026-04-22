@@ -2574,8 +2574,8 @@
           ground.receiveShadow = true;
           scene.add(ground);
 
-          buildVillage(20);
-          addLushVegetation(150);
+          buildVillage(40);
+          addLushVegetation(200);
 
           // 7. Chargement dome.glb
           if (statusEl) statusEl.textContent = "Chargement du modèle...";
@@ -3259,11 +3259,20 @@
         const baseS = 0.18;
 
         for (let i = 0; i < numCompounds; i++) {
-          // Village plus concentré (rayon de 120 au lieu de 250)
-          const distance = Math.pow(Math.random(), 0.7) * 120;
+          // Distribuer les concessions en plusieurs clusters épars sur tout le terrain
+          const clusterCenters = [
+            { x: 0, z: 0 },
+            { x: 250, z: -100 },
+            { x: -200, z: 300 },
+            { x: 300, z: 250 },
+            { x: -350, z: -200 },
+            { x: 150, z: 400 },
+          ];
+          const cluster = clusterCenters[i % clusterCenters.length];
+          const distance = 20 + Math.random() * 120;
           const theta = Math.random() * Math.PI * 2;
-          const cx = Math.cos(theta) * distance;
-          const cz = Math.sin(theta) * distance;
+          const cx = cluster.x + Math.cos(theta) * distance;
+          const cz = cluster.z + Math.sin(theta) * distance;
 
           // Zone de protection LARGE autour du dôme Musgum spécial (importé) à sa nouvelle place (-180, -180)
           if (Math.hypot(cx - -180, cz - -180) < 100) continue;
