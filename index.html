@@ -4005,19 +4005,10 @@
 
       // ===== ONBOARDING CONTROLLER =====
       (function () {
-        // Ne pas ré-afficher si déjà vu dans cette session
-        const SEEN_KEY = "musgum_onboarding_seen";
         const overlay = document.getElementById("onboarding-overlay");
         const hint = document.getElementById("ob-floating-hint");
 
-        // Si déjà vu → masquer immédiatement et montrer le hint flottant dès le début
-        if (sessionStorage.getItem(SEEN_KEY)) {
-          overlay.classList.add("hidden");
-          showFloatingHint();
-          return;
-        }
-
-        // Bloquer le scroll pendant l'onboarding
+        // Bloquer le scroll tant que l'onboarding est affiché
         document.body.style.overflow = "hidden";
 
         let currentStep = 0;
@@ -4032,71 +4023,25 @@
 
         function goToStep(n) {
           if (n < 0 || n >= totalSteps) return;
-          document
-            .getElementById("ob-step-" + currentStep)
-            .classList.remove("active");
-          document
-            .getElementById("ob-dot-" + currentStep)
-            .classList.remove("active");
+          document.getElementById("ob-step-" + currentStep).classList.remove("active");
+          document.getElementById("ob-dot-" + currentStep).classList.remove("active");
           currentStep = n;
-          document
-            .getElementById("ob-step-" + currentStep)
-            .classList.add("active");
-          document
-            .getElementById("ob-dot-" + currentStep)
-            .classList.add("active");
+          document.getElementById("ob-step-" + currentStep).classList.add("active");
+          document.getElementById("ob-dot-" + currentStep).classList.add("active");
         }
 
         window.obDismiss = function () {
           overlay.classList.add("hidden");
           document.body.style.overflow = "auto";
-          sessionStorage.setItem(SEEN_KEY, "1");
-          showFloatingHint();
-        };
-
-        // Auto-dismiss dès que l'utilisateur commence à scroller
-        function onFirstScroll() {
-          if (!overlay.classList.contains("hidden")) {
-            window.obDismiss();
-          }
-          window.removeEventListener("wheel", onFirstScroll);
-          window.removeEventListener("touchmove", onFirstScroll);
-          window.removeEventListener("keydown", onFirstScroll);
-        }
-        window.addEventListener("wheel", onFirstScroll, { passive: true });
-        window.addEventListener("touchmove", onFirstScroll, { passive: true });
-        window.addEventListener("keydown", onFirstScroll);
-
-        function showFloatingHint() {
-          // Montrer le hint flottant
-          hint.classList.add("visible");
-
-          // Fonction pour masquer le hint dès qu'on scroll réellement
-          function dismissHint() {
-            hint.style.opacity = "0";
-            hint.style.transform = "translateX(-50%) translateY(20px)";
+          // Montrer le hint flottant après fermeture
+          if (hint) {
+            hint.classList.add("visible");
             setTimeout(function () {
-              hint.classList.remove("visible");
-              hint.style.display = "none";
-            }, 800);
-
-            // Nettoyage des écouteurs
-            window.removeEventListener("wheel", dismissHint);
-            window.removeEventListener("touchmove", dismissHint);
+              hint.style.opacity = "0";
+              setTimeout(function () { hint.classList.remove("visible"); }, 800);
+            }, 5000);
           }
-
-          // Délai de 1s avant d'écouter le scroll pour éviter les faux déclenchements
-          // (ex: l'élan du clic sur "Démarrer")
-          setTimeout(() => {
-            window.addEventListener("wheel", dismissHint, { passive: true });
-            window.addEventListener("touchmove", dismissHint, {
-              passive: true,
-            });
-          }, 1000);
-
-          // Sécurité : masquer quand même après 15 secondes si l'utilisateur ne fait rien
-          setTimeout(dismissHint, 15000);
-        }
+        };
       })();
     </script>
   </body>
