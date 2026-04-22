@@ -1549,9 +1549,9 @@
         #construction-hud {
           left: auto !important;
           right: 10px !important;
-          padding: 20px 10px !important;
+          padding: 20px 14px !important;
           height: 60vh !important;
-          width: 80px !important;
+          width: 130px !important;
         }
 
         #construction-hud.active {
@@ -1638,24 +1638,24 @@
         top: 50%;
         right: 30px;
         transform: translateY(-50%) translateX(150%);
-        background: rgba(44, 30, 17, 0.4);
-        /* Glassmorphism */
+        background: rgba(44, 30, 17, 0.75);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(248, 213, 155, 0.2);
+        border: 1px solid rgba(248, 213, 155, 0.3);
         border-radius: 20px;
         padding: 30px 20px;
-        z-index: 250;
+        z-index: 5000;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 25px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5),
-          inset 0 0 20px rgba(248, 213, 155, 0.05);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7),
+          inset 0 0 20px rgba(248, 213, 155, 0.08);
         opacity: 0;
         transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         pointer-events: auto !important;
         box-sizing: border-box;
+        width: 150px;
         height: 70vh;
         max-height: 600px;
       }
@@ -1816,6 +1816,21 @@
         font-family: "Orbitron", sans-serif;
         color: #fff;
         font-size: 11px;
+      }
+
+      .hud-desc-row {
+        border-top: 1px solid rgba(248, 213, 155, 0.1);
+        padding-top: 12px;
+        width: 100%;
+        text-align: center;
+      }
+
+      .hud-desc-text {
+        font-family: "Outfit", sans-serif;
+        font-size: 9px;
+        color: rgba(248, 213, 155, 0.7);
+        line-height: 1.5;
+        letter-spacing: 0.5px;
       }
 
       .swipe-track {
@@ -2194,9 +2209,7 @@
 
       <div class="slider-container" id="slider-container">
         <div class="custom-slider-track"></div>
-        <!-- Glow background fill -->
         <div class="slider-track-glow" id="slider-fill"></div>
-        <!-- Draggable thumb -->
         <div class="custom-slider-thumb" id="slider-thumb"></div>
       </div>
 
@@ -2209,6 +2222,10 @@
           <span class="metric-label">Hauteur</span>
           <span class="metric-value" id="val-height">0.0m</span>
         </div>
+      </div>
+
+      <div class="hud-desc-row">
+        <span class="hud-desc-text" id="hud-desc">Glisse pour construire le dôme couche par couche</span>
       </div>
     </div>
 
@@ -3418,10 +3435,13 @@
         // Gérer la visibilité des indicateurs de défilement
         const indicator = document.getElementById("global-scroll-indicator");
         const swipeWrapper = document.getElementById("realistic-swipe-wrapper");
+        const scrollHud = document.getElementById("global-scroll-hud");
         if (indicator)
           indicator.style.display = isConstructionMode ? "none" : "block";
         if (swipeWrapper)
           swipeWrapper.style.display = isConstructionMode ? "none" : "flex";
+        if (scrollHud)
+          scrollHud.style.opacity = isConstructionMode ? "0" : "";
 
         const btn = document.getElementById("constructionBtn");
         const hud = document.getElementById("construction-hud");
@@ -3624,14 +3644,23 @@
           (currentHeight * 0.6).toFixed(1) + "m"; // Simulation d'échelle réelle
 
         const phaseEl = document.getElementById("construction-phase");
-        if (steppedProgress < 0.15) phaseEl.textContent = "Fondations en cours";
-        else if (steppedProgress < 0.5)
-          phaseEl.textContent = "Pose des Colombins";
-        else if (steppedProgress < 0.85)
-          phaseEl.textContent = "Fermeture de l'Ogive";
-        else if (steppedProgress < 1.0)
-          phaseEl.textContent = "Lissage & Nervures";
-        else phaseEl.textContent = "Structure Terminée";
+        const descEl = document.getElementById("hud-desc");
+        if (steppedProgress < 0.15) {
+          phaseEl.textContent = "Fondations";
+          if (descEl) descEl.textContent = "Tracé du plan circulaire au sol";
+        } else if (steppedProgress < 0.5) {
+          phaseEl.textContent = "Colombins";
+          if (descEl) descEl.textContent = "Rouleaux de banco empilés en spirale";
+        } else if (steppedProgress < 0.85) {
+          phaseEl.textContent = "Ogive";
+          if (descEl) descEl.textContent = "La voûte se referme — génie bioclimatique";
+        } else if (steppedProgress < 1.0) {
+          phaseEl.textContent = "Nervures";
+          if (descEl) descEl.textContent = "Lissage et rainures de drainage";
+        } else {
+          phaseEl.textContent = "Terminé ✓";
+          if (descEl) descEl.textContent = "17m² de fraîcheur naturelle — 0 climatiseur";
+        }
       };
 
       function animate() {
